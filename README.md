@@ -1,1 +1,0 @@
-# smpapps-starter
