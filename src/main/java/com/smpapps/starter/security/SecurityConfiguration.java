@@ -5,7 +5,6 @@ import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,7 +20,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
@@ -34,37 +32,37 @@ import lombok.RequiredArgsConstructor;
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
 public class SecurityConfiguration {
 
-  // private final CustomUserDetailsService customUserDetailsService;
-  // private final SocialAuthenticationProvider socialAuthenticationProvider;
-  // private final DataSource dataSource;
+  private final CustomUserDetailsService customUserDetailsService;
+  private final SocialAuthenticationProvider socialAuthenticationProvider;
+  private final DataSource dataSource;
 
   @Bean
   BCryptPasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
-  // @Bean
-  // DaoAuthenticationProvider daoAuthenticationProvider() {
-  //   DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-  //   provider.setUserDetailsService(customUserDetailsService);
-  //   provider.setPasswordEncoder(passwordEncoder());
-  //   return provider;
-  // }
+  @Bean
+  DaoAuthenticationProvider daoAuthenticationProvider() {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+    provider.setUserDetailsService(customUserDetailsService);
+    provider.setPasswordEncoder(passwordEncoder());
+    return provider;
+  }
 
-  // @Bean
-  // AuthenticationManager authManager(HttpSecurity http) throws Exception {
-  //   AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
-  //   builder.authenticationProvider(daoAuthenticationProvider());
-  //   builder.authenticationProvider(socialAuthenticationProvider);
-  //   return builder.build();
-  // }
+  @Bean
+  AuthenticationManager authManager(HttpSecurity http) throws Exception {
+    AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+    builder.authenticationProvider(daoAuthenticationProvider());
+    builder.authenticationProvider(socialAuthenticationProvider);
+    return builder.build();
+  }
 
-  // @Bean
-  // PersistentTokenRepository persistentTokenRepository() {
-  //   JdbcTokenRepositoryImpl repo = new JdbcTokenRepositoryImpl();
-  //   repo.setDataSource(dataSource);
-  //   return repo;
-  // }
+  @Bean
+  PersistentTokenRepository persistentTokenRepository() {
+    JdbcTokenRepositoryImpl repo = new JdbcTokenRepositoryImpl();
+    repo.setDataSource(dataSource);
+    return repo;
+  }
 
   @Bean
   SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -94,11 +92,6 @@ public class SecurityConfiguration {
               UserDetails userDetails = (UserDetails) authentication.getPrincipal();
               session.setAttribute("USER_EMAIL", userDetails.getUsername());
               session.setAttribute("USER_ROLES", userDetails.getAuthorities());
-              if (userDetails instanceof CustomUserDetails) {
-                CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
-                session.setAttribute("USER_ID", customUserDetails.getId());
-                session.setAttribute("USER_NAME", customUserDetails.getName());
-              }
               response.sendRedirect("/");
             })
             .failureHandler((request, response, exception) -> {
@@ -121,8 +114,8 @@ public class SecurityConfiguration {
             .logoutUrl("/logout")
             .invalidateHttpSession(true)
             .deleteCookies("JSESSIONID", "remember-me")
-            .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
-            .logoutSuccessUrl("/login?logout")
+            .clearAuthentication(true)
+            .logoutSuccessUrl("/")
             .permitAll())
         .rememberMe(rememberme -> rememberme
             .key("smp!@#rememberme!A)KC99Key")

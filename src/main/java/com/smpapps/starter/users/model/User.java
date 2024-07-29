@@ -1,19 +1,19 @@
 package com.smpapps.starter.users.model;
 
+import java.beans.Transient;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,14 +39,20 @@ public class User {
   @Column(nullable = false)
   private String password;
 
+  // @Column(nullable = false)
+  // private String name;
+  
   @Column(nullable = false)
-  private String name;
+  private String authority; // 권한 ADMIN, COMPANY, NORMAL, ANONYMOUS
 
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-  @Column(name = "role")
-  @Builder.Default
-  private List<String> roles = new ArrayList<>();
+  @JsonIgnore
+  @Column(columnDefinition = "varchar(255) default 'RULE_NORMAL'")
+  @Transient
+  public Collection<? extends GrantedAuthority> getUserAuthorities() {
+    ArrayList<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+    authorities.add(new SimpleGrantedAuthority(authority));
+    return authorities;
+  }
 
   @Builder.Default
   private boolean accountNonExpired = true;
