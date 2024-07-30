@@ -10,7 +10,7 @@
   </parent>
   <groupId>com.smpapps</groupId>
   <artifactId>starter</artifactId>
-  <version>0.0.51</version>
+  <version>0.0.77</version>
   <name>smpapps_starter</name>
   <description>smpapps security starter for Spring Boot</description>
 
@@ -42,8 +42,10 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
+      <artifactId>spring-boot-starter-oauth2-client</artifactId>
     </dependency>
+
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-thymeleaf</artifactId>

@@ -29,25 +29,26 @@ import lombok.NoArgsConstructor;
 public class User {
 
   @Id
+  @Column(unique = true, nullable = false)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false)
   private String email;
 
   @JsonIgnore
   @Column(nullable = false)
   private String password;
 
-  // @Column(nullable = false)
-  // private String name;
-  
+  @Column(nullable = false)
+  private String name;
+
   @Column(nullable = false)
   private String authority; // 권한 ADMIN, COMPANY, NORMAL, ANONYMOUS
 
+  @Transient
   @JsonIgnore
   @Column(columnDefinition = "varchar(255) default 'RULE_NORMAL'")
-  @Transient
   public Collection<? extends GrantedAuthority> getUserAuthorities() {
     ArrayList<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
     authorities.add(new SimpleGrantedAuthority(authority));
@@ -66,7 +67,6 @@ public class User {
   @Builder.Default
   private boolean enabled = true;
 
-  // password에 대한 getter는 제거하고, setter만 유지
   @JsonIgnore
   public void setPassword(String password) {
     this.password = password;

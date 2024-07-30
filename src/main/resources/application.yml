@@ -1,4 +1,6 @@
 logging:
   level:
     root: INFO
-    com.smpapps.starter: DEBUG
+    com:
+      smpapps:
+        starter: DEBUG
