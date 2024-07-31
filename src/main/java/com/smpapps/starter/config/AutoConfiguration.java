@@ -7,10 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 import com.smpapps.starter.security.CustomOAuth2UserService;
-import com.smpapps.starter.security.CustomUserDetailsService;
 import com.smpapps.starter.users.repository.UserRepository;
 
 @Configuration
@@ -26,11 +24,6 @@ public class AutoConfiguration {
   @Import(DataSourceAutoConfiguration.class)
   public static class ConditionalSecurityConfiguration {
     
-    @Bean
-    UserDetailsService userDetailsService(UserRepository userRepository) {
-      return new CustomUserDetailsService(userRepository);
-    }
-
     @Bean
     CustomOAuth2UserService customOAuth2UserService(UserRepository userRepository) {
       return new CustomOAuth2UserService(userRepository);

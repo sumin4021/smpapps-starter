@@ -7,12 +7,12 @@ import lombok.Getter;
 
 @Getter
 @SuppressWarnings("unchecked")
-public class OAuth2_NaverUserInfo implements OAuth2_UserInfo {
+public class OAuth2_AppleUserInfo implements OAuth2_UserInfo {
 
   private final Map<String, Object> attributes;
   private final Map<String, Object> response;
 
-  public OAuth2_NaverUserInfo(Map<String, Object> attributes) {
+  public OAuth2_AppleUserInfo(Map<String, Object> attributes) {
     this.attributes = attributes;
     this.response = (Map<String, Object>) attributes.get("response");
   }
@@ -38,6 +38,6 @@ public class OAuth2_NaverUserInfo implements OAuth2_UserInfo {
 
   @Override
   public String getProfileImage() {
-    return getResponseValue("profile_image").orElse("");
+    return "";
   }
 }

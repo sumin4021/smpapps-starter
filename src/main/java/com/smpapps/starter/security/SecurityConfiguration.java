@@ -5,12 +5,7 @@ import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AccountExpiredException;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.CredentialsExpiredException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.*;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -45,7 +40,6 @@ public class SecurityConfiguration {
   @Bean
   public PersistentTokenRepository persistentTokenRepository() {
     JdbcTokenRepositoryImpl repo = new JdbcTokenRepositoryImpl();
-    // repo.setCreateTableOnStartup(true); // true면 무조건 만듬
     repo.setDataSource(dataSource);
     return repo;
   }
@@ -104,7 +98,15 @@ public class SecurityConfiguration {
         .rememberMe(rememberme -> rememberme
             .key("smp!@#rememberme!A)KC99Key")
             .tokenValiditySeconds(60 * 60 * 24 * 30)
-            .tokenRepository(persistentTokenRepository()))
+            .tokenRepository(persistentTokenRepository())
+            .userDetailsService(customOAuth2UserService)
+            .rememberMeParameter("remember-me"))
+        // .rememberMe(rememberme -> rememberme
+        // .key("smp!@#rememberme!A)KC99Key")
+        // .tokenValiditySeconds(60 * 60 * 24 * 30)
+        // .tokenRepository(persistentTokenRepository())
+        // .userDetailsService(customOAuth2UserService)) // OAuth2 사용자도 remember-me 기능
+        // 사용
         .sessionManagement(session -> session
             .sessionFixation().changeSessionId()
             .maximumSessions(1)
@@ -116,14 +118,21 @@ public class SecurityConfiguration {
             }))
         .oauth2Login(oauth2 -> oauth2
             .loginPage("/login")
-            // .defaultSuccessUrl("/", true)
             .successHandler((request, response, authentication) -> {
               CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
               HttpSession session = request.getSession();
+              session.setAttribute("userprofileimage", userDetails.getProfileImage());
               session.setAttribute("username", userDetails.getName());
+              String rememberMeToken = userDetails.getUsername() + ":" + userDetails.getJoinChannel();
+              request.setAttribute("remember-me", rememberMeToken);
               response.sendRedirect("/");
             })
-            .failureUrl("/login?fail=oauth_error")
+            .failureHandler((request, response, exception) -> {
+              HttpSession session = request.getSession(false);
+              if (session != null)
+                session.invalidate();
+              response.sendRedirect("/?fail=oauth_error");
+            })
             .userInfoEndpoint(userInfo -> userInfo
                 .userService(customOAuth2UserService)));
 

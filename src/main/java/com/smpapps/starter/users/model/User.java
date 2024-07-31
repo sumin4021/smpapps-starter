@@ -1,9 +1,12 @@
 package com.smpapps.starter.users.model;
 
 import java.beans.Transient;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -15,6 +18,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,7 +49,14 @@ public class User {
   private String name;
 
   @Column(nullable = false)
+  private String profileImage;
+
+  @Column(nullable = false)
   private String authority; // 권한 ADMIN, COMPANY, NORMAL, ANONYMOUS
+
+  @Column(nullable = false)
+  @Builder.Default
+  private String joinChannel = "tripmate";
 
   @Transient
   @JsonIgnore
@@ -71,4 +83,13 @@ public class User {
   public void setPassword(String password) {
     this.password = password;
   }
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @CreationTimestamp
+  private LocalDateTime joinDate;
+
+  @Temporal(TemporalType.TIMESTAMP)
+  @UpdateTimestamp
+  private LocalDateTime loginDate;
+
 }

@@ -1,6 +1,11 @@
 package com.smpapps.starter.security;
 
+import java.time.LocalDateTime;
+
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -17,13 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+public class CustomOAuth2UserService extends DefaultOAuth2UserService implements UserDetailsService {
 
   private final UserRepository userRepository;
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
     OAuth2User oAuth2User = super.loadUser(oAuth2UserRequest);
+
     try {
       return processOAuth2User(oAuth2UserRequest, oAuth2User);
     } catch (Exception ex) {
@@ -31,23 +37,46 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
   }
 
-  private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {
-
-    OAuth2_UserInfo oAuth2UserInfo;
-    if (oAuth2UserRequest.getClientRegistration().getRegistrationId().equals("naver")) {
-      oAuth2UserInfo = new OAuth2_NaverUserInfo(oAuth2User.getAttributes());
-    } else if (oAuth2UserRequest.getClientRegistration().getRegistrationId().equals("google")) {
-      oAuth2UserInfo = new OAuth2_GoogleUserInfo(oAuth2User.getAttributes());
-    } else {
-      throw new OAuth2AuthenticationException("Sorry! Login with " + oAuth2UserRequest.getClientRegistration().getRegistrationId() + " is not supported yet.");
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    String[] parts = username.split(":");
+    if (parts.length != 2) {
+      throw new UsernameNotFoundException("Invalid username format");
     }
 
-    log.info("SMP :::::::: {}", oAuth2UserInfo.getEmail());
+    String email = parts[0];
+    String joinChannel = parts[1];
 
-    User user = userRepository.findByEmail(oAuth2UserInfo.getEmail())
+    User user = userRepository.findByEmailAndJoinChannel(email, joinChannel)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email + " and joinChannel: " + joinChannel));
+
+    return new CustomUserDetails(user);
+  }
+
+  private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {
+    OAuth2_UserInfo oAuth2UserInfo;
+    String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();
+
+    switch (registrationId) {
+      case "naver":
+        oAuth2UserInfo = new OAuth2_NaverUserInfo(oAuth2User.getAttributes());
+        break;
+      case "google":
+        oAuth2UserInfo = new OAuth2_GoogleUserInfo(oAuth2User.getAttributes());
+        break;
+      case "facebook":
+        oAuth2UserInfo = new OAuth2_FacebookUserInfo(oAuth2User.getAttributes());
+        break;
+      default:
+        throw new OAuth2AuthenticationException("Sorry! Login with " + registrationId + " is not supported yet.");
+    }
+
+    log.debug("OAuth2User channel: {} name: {} email: {} ", registrationId, oAuth2UserInfo.getName(), oAuth2UserInfo.getEmail());
+
+    User user = userRepository.findByEmailAndJoinChannel(oAuth2UserInfo.getEmail(), registrationId)
         .map(existingUser -> {
-          // 기존 사용자 정보 업데이트 (필요한 경우)
           existingUser.setName(oAuth2UserInfo.getName());
+          existingUser.setLoginDate(LocalDateTime.now());
           return userRepository.save(existingUser);
         })
         .orElseGet(() -> {
@@ -55,7 +84,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
               .email(oAuth2UserInfo.getEmail())
               .password(new BCryptPasswordEncoder().encode("issnsjoinuser!@$sdasd"))
               .name(oAuth2UserInfo.getName())
+              .profileImage(oAuth2UserInfo.getProfileImage())
+              .joinChannel(registrationId)
               .authority("ROLE_NORMAL")
+              .joinDate(LocalDateTime.now())
+              .loginDate(LocalDateTime.now())
               .build();
           return userRepository.save(newUser);
         });

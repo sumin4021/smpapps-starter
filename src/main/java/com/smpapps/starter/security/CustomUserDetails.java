@@ -15,65 +15,74 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
   private Map<String, Object> attributes;
 
   public CustomUserDetails(User user) {
-      this.user = user;
+    this.user = user;
   }
 
   public CustomUserDetails(User user, Map<String, Object> attributes) {
-      this.user = user;
-      this.attributes = attributes;
+    this.user = user;
+    this.attributes = attributes;
   }
 
   @Override
   public String getPassword() {
-      return user.getPassword();
+    return user.getPassword();
   }
 
   @Override
   public String getUsername() {
-      return user.getEmail();
+    return user.getEmail();
   }
 
   @Override
   public boolean isAccountNonExpired() {
-      return user.isAccountNonExpired();
+    return user.isAccountNonExpired();
   }
 
   @Override
   public boolean isAccountNonLocked() {
-      return user.isAccountNonLocked();
+    return user.isAccountNonLocked();
   }
 
   @Override
   public boolean isCredentialsNonExpired() {
-      return user.isCredentialsNonExpired();
+    return user.isCredentialsNonExpired();
   }
 
   @Override
   public boolean isEnabled() {
-      return user.isEnabled();
+    return user.isEnabled();
   }
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-      return user.getUserAuthorities();
+    return user.getUserAuthorities();
   }
 
   @Override
   public Map<String, Object> getAttributes() {
-      return attributes;
+    return attributes;
   }
 
   @Override
   public String getName() {
-      return user.getName();
+    return user.getName();
   }
 
   // 추가 메서드
   public Long getId() {
-      return user.getId();
+    return user.getId();
   }
 
   public String getEmail() {
-      return user.getEmail();
+    return user.getEmail();
   }
+
+  public String getProfileImage() {
+    return user.getProfileImage();
+  }
+
+  public String getJoinChannel(){
+    return user.getJoinChannel();
+  }
+
 }
