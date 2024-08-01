@@ -101,12 +101,6 @@ public class SecurityConfiguration {
             .tokenRepository(persistentTokenRepository())
             .userDetailsService(customOAuth2UserService)
             .rememberMeParameter("remember-me"))
-        // .rememberMe(rememberme -> rememberme
-        // .key("smp!@#rememberme!A)KC99Key")
-        // .tokenValiditySeconds(60 * 60 * 24 * 30)
-        // .tokenRepository(persistentTokenRepository())
-        // .userDetailsService(customOAuth2UserService)) // OAuth2 사용자도 remember-me 기능
-        // 사용
         .sessionManagement(session -> session
             .sessionFixation().changeSessionId()
             .maximumSessions(1)
