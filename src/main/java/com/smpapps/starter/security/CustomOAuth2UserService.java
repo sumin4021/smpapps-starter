@@ -64,8 +64,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService implements
       case "google":
         oAuth2UserInfo = new OAuth2_GoogleUserInfo(oAuth2User.getAttributes());
         break;
-      case "facebook":
+      case "instagram":
         oAuth2UserInfo = new OAuth2_FacebookUserInfo(oAuth2User.getAttributes());
+        break;
+      case "facebook":
+        oAuth2UserInfo = new OAuth2_InstagramUserInfo(oAuth2User.getAttributes());
         break;
       default:
         throw new OAuth2AuthenticationException("Sorry! Login with " + registrationId + " is not supported yet.");
