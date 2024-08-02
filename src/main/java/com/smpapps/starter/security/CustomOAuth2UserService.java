@@ -28,13 +28,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService implements
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
-    OAuth2User oAuth2User = super.loadUser(oAuth2UserRequest);
-
-    log.debug("oAuth2UserRequest : {} ", oAuth2UserRequest);
-
     try {
+      OAuth2User oAuth2User = super.loadUser(oAuth2UserRequest);
+      log.debug("oAuth2UserRequest : {} ", oAuth2UserRequest);
       return processOAuth2User(oAuth2UserRequest, oAuth2User);
     } catch (Exception ex) {
+      log.error("Error in loadUser", ex);
       throw new InternalAuthenticationServiceException(ex.getMessage(), ex.getCause());
     }
   }

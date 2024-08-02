@@ -25,7 +25,7 @@ public class OAuth2_InstagramUserInfo implements OAuth2_UserInfo {
 
   @Override
   public String getEmail() {
-    return (String) attributes.get("username");
+    return (String) attributes.get("username")+"@instagram.com";
   }
 
   @Override
