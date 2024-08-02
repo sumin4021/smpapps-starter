@@ -57,6 +57,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService implements
     OAuth2_UserInfo oAuth2UserInfo;
     String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();
 
+    log.debug("type : {} ", registrationId);
+    
     switch (registrationId) {
       case "naver":
         oAuth2UserInfo = new OAuth2_NaverUserInfo(oAuth2User.getAttributes());
@@ -64,10 +66,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService implements
       case "google":
         oAuth2UserInfo = new OAuth2_GoogleUserInfo(oAuth2User.getAttributes());
         break;
-      case "instagram":
+      case "facebook":
         oAuth2UserInfo = new OAuth2_FacebookUserInfo(oAuth2User.getAttributes());
         break;
-      case "facebook":
+      case "instagram":
         oAuth2UserInfo = new OAuth2_InstagramUserInfo(oAuth2User.getAttributes());
         break;
       default:
