@@ -10,7 +10,7 @@
   </parent>
   <groupId>com.smpapps</groupId>
   <artifactId>starter</artifactId>
-  <version>0.1.12</version>
+  <version>0.1.13</version>
   <name>smpapps_starter</name>
   <description>smpapps security starter for Spring Boot</description>
 

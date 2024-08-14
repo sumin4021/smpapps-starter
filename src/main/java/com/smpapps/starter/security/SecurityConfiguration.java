@@ -53,7 +53,7 @@ public class SecurityConfiguration {
         .headers(headers -> headers.frameOptions(Customizer.withDefaults()))
         .authorizeHttpRequests(authRequest -> authRequest
             .requestMatchers("/", "/css/**", "/images/**", "/js/**").permitAll()
-            .requestMatchers("/login", "/logout", "/oauth2/**", "/error").permitAll()
+            .requestMatchers("/signin", "/signout", "/oauth2/**", "/error").permitAll()
             .requestMatchers(HttpMethod.HEAD, "/**").permitAll()
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .requestMatchers(HttpMethod.DELETE, "/**").authenticated()
@@ -63,7 +63,7 @@ public class SecurityConfiguration {
             .requestMatchers(HttpMethod.GET, "/**").permitAll()
             .anyRequest().authenticated())
         .formLogin(formLogin -> formLogin
-            .loginPage("/login")
+            .loginPage("/signin")
             .defaultSuccessUrl("/", true)
             .usernameParameter("email")
             .passwordParameter("password")
@@ -87,11 +87,11 @@ public class SecurityConfiguration {
               } else if (exception instanceof CredentialsExpiredException) {
                 errorMessage = "credentials_expired";
               }
-              response.sendRedirect("/login?fail=" + errorMessage);
+              response.sendRedirect("/signin?fail=" + errorMessage);
             })
             .permitAll())
         .logout(logout -> logout
-            .logoutUrl("/logout")
+            .logoutUrl("/signout")
             .clearAuthentication(true)
             .invalidateHttpSession(true)
             .deleteCookies("JSESSIONID", "remember-me")
@@ -107,13 +107,13 @@ public class SecurityConfiguration {
             .sessionFixation().changeSessionId()
             .maximumSessions(1)
             .maxSessionsPreventsLogin(false)
-            .expiredUrl("/login?fail=expire_session"))
+            .expiredUrl("/signin?fail=expire_session"))
         .exceptionHandling(exceptionHandling -> exceptionHandling
             .accessDeniedHandler((request, response, accessDeniedException) -> {
               response.sendRedirect("/block");
             }))
         .oauth2Login(oauth2 -> oauth2
-            .loginPage("/login")
+            .loginPage("/signin")
             .successHandler((request, response, authentication) -> {
               CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
               HttpSession session = request.getSession();
