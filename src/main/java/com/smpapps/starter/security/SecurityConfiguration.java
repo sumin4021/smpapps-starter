@@ -17,7 +17,9 @@ import org.springframework.security.web.authentication.rememberme.JdbcTokenRepos
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
@@ -122,6 +124,8 @@ public class SecurityConfiguration {
               response.sendRedirect("/");
             })
             .failureHandler((request, response, exception) -> {
+
+              log.error("EXCEPTION ::::", exception);
               HttpSession session = request.getSession(false);
               if (session != null)
                 session.invalidate();

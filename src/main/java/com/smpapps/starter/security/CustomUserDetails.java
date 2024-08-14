@@ -23,6 +23,10 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     this.attributes = attributes;
   }
 
+  public User getUser() {
+    return this.user;
+  }
+  
   @Override
   public String getPassword() {
     return user.getPassword();
@@ -81,7 +85,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     return user.getProfileImage();
   }
 
-  public String getJoinChannel(){
+  public String getJoinChannel() {
     return user.getJoinChannel();
   }
 
