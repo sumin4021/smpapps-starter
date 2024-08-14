@@ -86,10 +86,10 @@ public class User {
 
   @Temporal(TemporalType.TIMESTAMP)
   @CreationTimestamp
-  private LocalDateTime joinDate;
+  private LocalDateTime signupAt;
 
   @Temporal(TemporalType.TIMESTAMP)
   @UpdateTimestamp
-  private LocalDateTime loginDate;
+  private LocalDateTime signinAt;
 
 }

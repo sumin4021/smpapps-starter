@@ -84,7 +84,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService implements
     User user = userRepository.findByEmailAndJoinChannel(oAuth2UserInfo.getEmail(), registrationId)
         .map(existingUser -> {
           existingUser.setName(oAuth2UserInfo.getName());
-          existingUser.setLoginDate(LocalDateTime.now());
+          existingUser.setSigninAt(LocalDateTime.now());
           return userRepository.save(existingUser);
         })
         .orElseGet(() -> {
@@ -95,8 +95,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService implements
               .profileImage(oAuth2UserInfo.getProfileImage())
               .joinChannel(registrationId)
               .authority("ROLE_NORMAL")
-              .joinDate(LocalDateTime.now())
-              .loginDate(LocalDateTime.now())
+              .signupAt(LocalDateTime.now())
+              .signinAt(LocalDateTime.now())
               .build();
           return userRepository.save(newUser);
         });
