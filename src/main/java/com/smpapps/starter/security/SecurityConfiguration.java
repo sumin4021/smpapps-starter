@@ -13,8 +13,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,11 @@ public class SecurityConfiguration {
     JdbcTokenRepositoryImpl repo = new JdbcTokenRepositoryImpl();
     repo.setDataSource(dataSource);
     return repo;
+  }
+
+  @Bean
+  public RememberMeServices rememberMeServices() {
+    return new TokenBasedRememberMeServices("smp!@#rememberme!A)KC99Key", customOAuth2UserService);
   }
 
   @Bean
@@ -98,7 +105,6 @@ public class SecurityConfiguration {
             .logoutSuccessUrl("/")
             .permitAll())
         .rememberMe(rememberme -> rememberme
-            .key("smp!@#rememberme!A)KC99Key")
             .tokenValiditySeconds(60 * 60 * 24 * 30)
             .tokenRepository(persistentTokenRepository())
             .userDetailsService(customOAuth2UserService)
@@ -119,12 +125,10 @@ public class SecurityConfiguration {
               HttpSession session = request.getSession();
               session.setAttribute("userprofileimage", userDetails.getProfileImage());
               session.setAttribute("username", userDetails.getName());
-              String rememberMeToken = userDetails.getUsername() + ":" + userDetails.getJoinChannel();
-              request.setAttribute("remember-me", rememberMeToken);
+              rememberMeServices().loginSuccess(request, response, authentication);
               response.sendRedirect("/");
             })
             .failureHandler((request, response, exception) -> {
-
               log.error("EXCEPTION ::::", exception);
               HttpSession session = request.getSession(false);
               if (session != null)
